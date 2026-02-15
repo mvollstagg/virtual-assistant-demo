@@ -23,14 +23,17 @@ function Avatar({ speakingBlendData, playing }: Props) {
     '/images/body.webp','/images/eyes.webp','/images/teeth_diffuse.webp','/images/body_roughness.webp','/images/body_normal.webp','/images/teeth_normal.webp','/images/h_color.webp','/images/tshirt_diffuse.webp','/images/tshirt_normal.webp','/images/tshirt_roughness.webp','/images/h_alpha.webp','/images/h_normal.webp','/images/h_roughness.webp'
   ]);
 
-  _.each([bodyTexture, eyesTexture, teethTexture, teethNormalTexture, bodyRoughnessTexture, bodyNormalTexture, tshirtDiffuseTexture, tshirtNormalTexture, tshirtRoughnessTexture, hairAlphaTexture, hairNormalTexture, hairRoughnessTexture], (t) => {
+  // Only color textures should use sRGB. Data maps (normal/roughness/alpha)
+  // must remain linear, otherwise materials can render too dark or incorrect.
+  _.each([bodyTexture, eyesTexture, teethTexture, hairTexture, tshirtDiffuseTexture], (t) => {
     t.colorSpace = SRGBColorSpace;
     t.flipY = false;
   });
 
-  bodyNormalTexture.colorSpace = LinearSRGBColorSpace;
-  tshirtNormalTexture.colorSpace = LinearSRGBColorSpace;
-  teethNormalTexture.colorSpace = LinearSRGBColorSpace;
+  _.each([teethNormalTexture, bodyRoughnessTexture, bodyNormalTexture, tshirtNormalTexture, tshirtRoughnessTexture, hairAlphaTexture, hairNormalTexture, hairRoughnessTexture], (t) => {
+    t.colorSpace = LinearSRGBColorSpace;
+    t.flipY = false;
+  });
 
   gltf.scene.traverse((node: any) => {
     if (node.type === 'Mesh' || node.type === 'SkinnedMesh') {
@@ -87,9 +90,13 @@ function Avatar({ speakingBlendData, playing }: Props) {
 export function AvatarCanvas(props: Props) {
   return (
     <div className="h-[360px] rounded-box overflow-hidden bg-base-300">
-      <Canvas dpr={2}>
+      <Canvas dpr={2} shadows gl={{ antialias: true, outputColorSpace: SRGBColorSpace, toneMappingExposure: 1.2 }}>
         <OrthographicCamera makeDefault zoom={2000} position={[0, 1.65, 1]} />
         <Suspense fallback={null}>
+          <ambientLight intensity={0.55} />
+          <hemisphereLight intensity={0.45} groundColor="#3a3a3a" />
+          <directionalLight position={[1.2, 2.4, 2.2]} intensity={1.3} castShadow />
+          <directionalLight position={[-1.5, 1.2, 1.8]} intensity={0.5} />
           <Environment background={false} files="/images/photo_studio_loft_hall_1k.hdr" />
           <Avatar {...props} />
         </Suspense>
