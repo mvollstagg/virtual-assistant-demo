@@ -1,4 +1,4 @@
-export type ProviderKind = 'openai' | 'gemini' | 'azure' | 'local' | 'mock' | 'browser';
+export type ProviderKind = 'openai' | 'gemini' | 'deepgram' | 'azure' | 'local' | 'mock' | 'browser';
 
 export interface ProviderConfig {
   type: ProviderKind;

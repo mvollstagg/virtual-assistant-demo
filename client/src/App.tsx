@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AvatarCanvas } from './components/AvatarCanvas';
 import { SettingsPanel } from './components/SettingsPanel';
+import { createFallbackBlendData } from './lib/fallbackBlend';
 import { generateChatResponse } from './providers/chat';
 import { transcribeSpeech } from './providers/speech-to-text';
 import { synthesizeSpeech } from './providers/text-to-speech';
@@ -42,23 +43,34 @@ export default function App() {
 
   async function speak(text: string) {
     const result = await synthesizeSpeech(text, settings.tts);
-    if (result.blendData) setBlendData(result.blendData);
 
     if (settings.tts.type === 'browser' || !result.audioBase64) {
-      setPlaying(true);
+      setBlendData(result.blendData?.length ? result.blendData : createFallbackBlendData(text));
       await new Promise<void>((resolve) => {
         const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onstart = () => setPlaying(true);
         utterance.onend = () => { setPlaying(false); resolve(); };
         speechSynthesis.speak(utterance);
       });
       return;
     }
 
-    setPlaying(true);
     await new Promise<void>((resolve) => {
       const audio = new Audio(`data:${result.mimeType || 'audio/mpeg'};base64,${result.audioBase64}`);
+      audio.onloadedmetadata = () => {
+        if (result.blendData?.length) {
+          setBlendData(result.blendData);
+        } else {
+          const duration = Number.isFinite(audio.duration) ? audio.duration : undefined;
+          setBlendData(createFallbackBlendData(text, duration));
+        }
+      };
+      audio.onplay = () => setPlaying(true);
       audio.onended = () => { setPlaying(false); resolve(); };
-      audio.play();
+      audio.play().catch(() => {
+        setPlaying(false);
+        resolve();
+      });
     });
   }
 

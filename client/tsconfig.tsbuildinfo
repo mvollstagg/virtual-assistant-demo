@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/components/avatarcanvas.tsx","./src/components/settingspanel.tsx","./src/lib/fallbackblend.ts","./src/providers/chat/index.ts","./src/providers/speech-to-text/index.ts","./src/providers/text-to-speech/index.ts"],"errors":true,"version":"5.9.3"}

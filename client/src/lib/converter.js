@@ -46,7 +46,7 @@ function createAnimation (recordedData, morphTargetDictionary, bodyPart) {
 
           animation[morphTargetDictionary[modifiedKey(key)]].push(value)
         });
-        time.push(finishedFrames / fps)
+        time.push(typeof d.time === 'number' ? d.time : finishedFrames / fps)
         finishedFrames++
 
     })

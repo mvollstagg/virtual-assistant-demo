@@ -1,11 +1,13 @@
 import { ProviderConfig, TextToSpeechProvider } from '../../types.js';
 import { azureTtsProvider } from './azure.js';
+import { deepgramTtsProvider } from './deepgram.js';
 import { geminiTtsProvider } from './gemini.js';
 import { localTtsProvider } from './local.js';
 import { mockTtsProvider } from './mock.js';
 
 const map: Record<string, TextToSpeechProvider> = {
   azure: azureTtsProvider,
+  deepgram: deepgramTtsProvider,
   gemini: geminiTtsProvider,
   local: localTtsProvider,
   mock: mockTtsProvider,
